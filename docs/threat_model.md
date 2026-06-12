@@ -10,21 +10,21 @@ patient-safety impact used to design the 12 attack vectors in this project.
 
 ## Attacker Personas
 
-### Persona 1 — External Ransomware Gang
+### Persona 1 : External Ransomware Gang
 | Field | Detail |
 |-------|--------|
 | **Who** | Organised cybercriminal group |
-| **Motivation** | Financial — encrypt patient data, demand ransom |
-| **Technical skill** | High — automated scanning, known exploit toolkits |
+| **Motivation** | Financial - encrypt patient data, demand ransom |
+| **Technical skill** | High - automated scanning, known exploit toolkits |
 | **Access starting point** | Public-facing FHIR API endpoints |
 | **Real-world example** | 2024 Change Healthcare breach, 2022 Medibank breach |
 
-### Persona 2 — Malicious Insider
+### Persona 2 : Malicious Insider
 | Field | Detail |
 |-------|--------|
 | **Who** | Disgruntled employee or contractor with existing system access |
-| **Motivation** | Data theft, sabotage, or selling patient records |
-| **Technical skill** | Medium — knows internal systems, has valid credentials |
+| **Motivation** | Data theft, sabotag, or selling patient records |
+| **Technical skill** | Medium - knows internal systems and has valid credentials |
 | **Access starting point** | Valid JWT token with Practitioner role |
 | **Real-world example** | Insider accessing records of celebrities or family members |
 
@@ -32,8 +32,7 @@ patient-safety impact used to design the 12 attack vectors in this project.
 
 ## FHIR Attack Surface
 
-These are the 8 FHIR R4 resource types exposed by the mock API and the
-sensitive data each one holds.
+These are the 8 FHIR R4 resource types exposed by the mock API and the sensitive data each one holds.
 
 | FHIR Resource | Sensitive Data | If Compromised |
 |---|---|---|

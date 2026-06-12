@@ -110,9 +110,13 @@ No real patient data was used at any point. Built for security research and educ
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Placeholders to add as I progress:
-Demo GIF — add the ![Demo](assets/demo.gif) line at the top once you record it on Day 16
-Key Findings — replace the placeholder numbers with real ones after Day 6
-Kaggle URL — add on Day 15 when you publish the dataset
+
+Kaggle link → Day 15 when you publish the dataset
+Demo GIF → Day 16 when you record it
+Live Streamlit URL → Day 17 when you deploy
+Key Findings numbers → Day 6 after the classifier runs
+Threat report PDF link → Day 14 when the report is done
+Your name, email, LinkedIn → fill these in now actually
 
 
 

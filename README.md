@@ -117,6 +117,9 @@ Live Streamlit URL → Day 17 when you deploy
 Key Findings numbers → Day 6 after the classifier runs
 Threat report PDF link → Day 14 when the report is done
 Your name, email, LinkedIn → fill these in now actually
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Notes:
+1.Anyone cloning the repository can generate the fhir.db just by running the load_synthea.py
 
 
 

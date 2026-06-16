@@ -6,12 +6,15 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from datetime import datetime
 import uuid
+from auth import router, verify_token
+from fastapi import Depends
 
 #FastAPI instance creation
 app = FastAPI(
     title="ClinicalShield AI - Mock FHIR R4 API",
     version="1.0.0"
 )
+app.include_router(router)
 
 #Mock Patients-ResourceType data
 patients = {
@@ -86,14 +89,14 @@ class AppointmentBody(BaseModel):
 
 
 ##Endpoint1 GET /fhir/r4/Patient/{id}
-@app.get("/fhir/r4/Patient/{id}",status_code=200)#decorator for FastAPI
+@app.get("/fhir/r4/Patient/{id}",status_code=200, dependencies=[Depends(verify_token)])#decorator for FastAPI
 def get_patient(id:str):
     if id in patients:
         return patients[id]
     raise HTTPException(status_code=404, detail="No records found :(")
 
 ##Endpoint 2 POST /fhir/r4/MedicationRequest
-@app.post("/fhir/r4/MedicationRequest",status_code=201)
+@app.post("/fhir/r4/MedicationRequest",status_code=201, dependencies=[Depends(verify_token)])
 def add_medication(body:MedicationRequest):
     new_record={
         "id":"med-"+str(uuid.uuid4())[:8],
@@ -108,7 +111,7 @@ def add_medication(body:MedicationRequest):
     return new_record
 
 #Endpoint 3 GET /fhir/r4/Observation
-@app.get("/fhir/r4/Observation")
+@app.get("/fhir/r4/Observation", dependencies=[Depends(verify_token)])
 def get_observation(subject:str=None):#FastAPI validates the parse automatically and checks for ?subject. If present, it returns only that from the list or else the whole in a bundle
     #looping is to be done through the observations list----->object is required
     if subject:
@@ -125,7 +128,7 @@ def get_observation(subject:str=None):#FastAPI validates the parse automatically
 
 
 #Endpoint 4
-@app.post("/fhir/r4/Appointment", status_code=201)
+@app.post("/fhir/r4/Appointment", status_code=201, dependencies=[Depends(verify_token)])
 def add_appointment(body: AppointmentBody):
     new_record = {
         "id":"appt-"+str(uuid.uuid4())[:8],

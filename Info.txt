@@ -1,0 +1,280 @@
+Kaggle:
+SQL Injection - Day2 - https://www.kaggle.com/code/paarmuhilanm/clinicalshield-ai-sql-injection-payloads-fhirr4
+
+
+The 5 Endpoints Explained
+1. GET /fhir/r4/Patient/{id}
+Client asks "give me patient 123." Code looks up that ID in the in-memory patients dict. Found → return it. Not found → HTTP 404. Most common EHR read operation and the most common target for unauthorized access attacks.
+
+2. POST /fhir/r4/MedicationRequest
+Client sends JSON with drug name, patient ID, dosage. Code generates a new ID, timestamps it, appends to medications list. Simulates prescribing — targeted for unauthorized prescription creation attacks.
+
+3. GET /fhir/r4/Observation
+Returns all lab results from the observations list. Supports optional ?subject=Patient/p001 query filter. Targeted for bulk data exfiltration attacks.
+
+4. POST /fhir/r4/Appointment
+Client sends patient ID + datetime + reason. Code creates an appointment record, appends to appointments list. Targeted for patient-record tampering attacks.
+
+5. GET /fhir/r4/metadata ← Attack Vector #3
+Returns a CapabilityStatement — a FHIR-standard JSON that lists every resource and operation your server supports. In real EHRs this is public and unauthenticated. Attackers hit this first to map the entire attack surface. Your mock must return this accurately — it's what makes the simulation realistic.
+
+
+
+ "id": "med-" + str(uuid.uuid4())[:8],
+        "resourceType": "MedicationRequest",
+        "status": "active",
+        "subject": {"reference": "Patient/" + body.patientId},
+        "medicationCodeableConcept": {"text": body.drug},
+        "dosageInstruction": [{"text": body.dosage}],
+        "authoredOn": datetime.now().isoformat()
+
+
+Observations seed data:
+observations = [
+    {
+        "id": "obs-001",
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {"reference": "Patient/p001"},
+        "code": {"text": "Blood Pressure"},
+        "valueQuantity": {"value": 120, "unit": "mmHg"}
+    },
+    {
+        "id": "obs-002",
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {"reference": "Patient/p001"},
+        "code": {"text": "Blood Glucose"},
+        "valueQuantity": {"value": 5.4, "unit": "mmol/L"}
+    },
+    {
+        "id": "obs-003",
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {"reference": "Patient/p002"},
+        "code": {"text": "Heart Rate"},
+        "valueQuantity": {"value": 72, "unit": "bpm"}
+    },
+    {
+        "id": "obs-004",
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {"reference": "Patient/p002"},
+        "code": {"text": "Oxygen Saturation"},
+        "valueQuantity": {"value": 98, "unit": "%"}
+    },
+    {
+        "id": "obs-005",
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {"reference": "Patient/p003"},
+        "code": {"text": "Body Temperature"},
+        "valueQuantity": {"value": 36.8, "unit": "°C"}
+    }
+]
+
+Endpoint 3:
+@app.get("/fhir/r4/Observation")
+def get_observations(subject: str = None):
+    if subject:
+        filtered = [o for o in observations if o["subject"]["reference"] == subject]
+    else:
+        filtered = observations
+    return {
+        "resourceType": "Bundle",
+        "type": "searchset",
+        "total": len(filtered),
+        "entry": [{"resource": o} for o in filtered]
+    }
+	
+#ALGORITHM FOR LOADER FILE
+START
+│
+├── 1. IMPORTS
+│       import sqlite3
+│       import json
+│       import os
+│
+├── 2. SETUP PATHS
+│       DB_PATH = "fhir.db"
+│       SYNTHEA_FOLDER = "synthea_sample_data_fhir_latest"
+│
+├── 3. CONNECT TO SQLITE
+│       conn = sqlite3.connect(DB_PATH)
+│       cursor = conn.cursor()
+│
+├── 4. CREATE 3 TABLES (if they don't exist)
+│
+│       patients table:
+│           id          TEXT PRIMARY KEY
+│           name        TEXT
+│           gender      TEXT
+│           birth_date  TEXT
+│
+│       observations table:
+│           id          TEXT PRIMARY KEY
+│           subject     TEXT
+│           code        TEXT
+│           status      TEXT
+│
+│       medication_requests table:
+│           id          TEXT PRIMARY KEY
+│           subject     TEXT
+│           medication  TEXT
+│           status      TEXT
+│           authored_on TEXT
+│
+├── 5. LOOP THROUGH FILES
+│       For every file in SYNTHEA_FOLDER:
+│           IF filename starts with "hospital" or "practitioner" → skip
+│           Open and parse the JSON file
+│           Get the "entry" list from the Bundle
+│
+├── 6. LOOP THROUGH ENTRIES IN EACH FILE
+│       For every entry in the Bundle:
+│           Get resource = entry["resource"]
+│           Get resourceType = resource["resourceType"]
+│
+│           IF resourceType == "Patient":
+│               Extract id, name, gender, birthDate
+│               INSERT OR IGNORE into patients table
+│
+│           IF resourceType == "Observation":
+│               Extract id, subject, code, status
+│               INSERT OR IGNORE into observations table
+│
+│           IF resourceType == "MedicationRequest":
+│               Extract id, subject, medication, status, authoredOn
+│               INSERT OR IGNORE into medication_requests table
+│
+├── 7. SAVE AND CLOSE
+│       conn.commit()
+│       conn.close()
+│
+├── 8. PRINT SUMMARY
+│       Print how many patients loaded
+│       Print how many observations loaded
+│       Print how many medication_requests loaded
+│
+└── END
+Code:
+import sqlite3
+import json
+import os
+
+# Paths
+DB_PATH = "fhir.db"
+SYNTHEA_FOLDER = "synthea_sample_data_fhir_latest"
+
+# Connect to SQLite (creates fhir.db if it doesn't exist)
+conn = sqlite3.connect(DB_PATH)
+cursor = conn.cursor()
+
+# Create tables
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS patients (
+        id          TEXT PRIMARY KEY,
+        name        TEXT,
+        gender      TEXT,
+        birth_date  TEXT
+    )
+""")
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS observations (
+        id      TEXT PRIMARY KEY,
+        subject TEXT,
+        code    TEXT,
+        status  TEXT
+    )
+""")
+
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS medication_requests (
+        id          TEXT PRIMARY KEY,
+        subject     TEXT,
+        medication  TEXT,
+        status      TEXT,
+        authored_on TEXT
+    )
+""")
+
+# Counters
+patients_loaded = 0
+observations_loaded = 0
+medications_loaded = 0
+
+# Loop through every file in the Synthea folder
+for filename in os.listdir(SYNTHEA_FOLDER):
+
+    # Skip hospital and practitioner files
+    if filename.startswith("hospital") or filename.startswith("practitioner"):
+        continue
+
+    filepath = os.path.join(SYNTHEA_FOLDER, filename)
+
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            bundle = json.load(f)
+
+        # Loop through every entry in the Bundle
+        for entry in bundle.get("entry", []):
+            resource = entry.get("resource", {})
+            resource_type = resource.get("resourceType", "")
+
+            # Patient
+            if resource_type == "Patient":
+                pid = resource.get("id", "")
+                name_obj = resource.get("name", [{}])[0]
+                given = name_obj.get("given", [""])[0]
+                family = name_obj.get("family", "")
+                name = given + " " + family
+                gender = resource.get("gender", "unknown")
+                birth_date = resource.get("birthDate", "")
+
+                cursor.execute("""
+                    INSERT OR IGNORE INTO patients (id, name, gender, birth_date)
+                    VALUES (?, ?, ?, ?)
+                """, (pid, name, gender, birth_date))
+                patients_loaded += 1
+
+            # Observation
+            elif resource_type == "Observation":
+                oid = resource.get("id", "")
+                subject = resource.get("subject", {}).get("reference", "")
+                code = resource.get("code", {}).get("text", "Unknown")
+                status = resource.get("status", "")
+
+                cursor.execute("""
+                    INSERT OR IGNORE INTO observations (id, subject, code, status)
+                    VALUES (?, ?, ?, ?)
+                """, (oid, subject, code, status))
+                observations_loaded += 1
+
+            # MedicationRequest
+            elif resource_type == "MedicationRequest":
+                mid = resource.get("id", "")
+                subject = resource.get("subject", {}).get("reference", "")
+                medication = resource.get("medicationCodeableConcept", {}).get("text", "Unknown")
+                status = resource.get("status", "")
+                authored_on = resource.get("authoredOn", "")
+
+                cursor.execute("""
+                    INSERT OR IGNORE INTO medication_requests (id, subject, medication, status, authored_on)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (mid, subject, medication, status, authored_on))
+                medications_loaded += 1
+
+    except Exception as e:
+        print(f"Skipping {filename}: {e}")
+        continue
+
+# Save and close
+conn.commit()
+conn.close()
+
+# Summary
+print(f"Patients loaded:       {patients_loaded}")
+print(f"Observations loaded:   {observations_loaded}")
+print(f"Medications loaded:    {medications_loaded}")
+print(f"Database saved to:     {DB_PATH}")

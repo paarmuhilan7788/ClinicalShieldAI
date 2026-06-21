@@ -29,3 +29,10 @@ The only difference is the pattern across multiple requests — not detectable i
 **Root cause** Claude sets it's own terminologies like "Unknown (404)", "N/A","Bundle (Observation)" instead of exact FHIR R4 resource type names.
 **Impact** 767 validation issues across 526 records
 **Resolution** include specifics in the system prompt.
+
+## Issue 5: Invalid fhir_resource
+**Affected** ATK_120
+**Root-Cause** LLM has generated non standard fhir values
+**Impact:** Integration test fails on fhir_resource whitelist assertion  
+**Fix:** Re-run generator with explicit fhir_resource whitelist in prompt  
+**Status:** Open

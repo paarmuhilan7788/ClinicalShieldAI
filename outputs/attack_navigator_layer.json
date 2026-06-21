@@ -1,0 +1,90 @@
+{
+  "name": "ClinicalShield AI \u2014 FHIR Attack Coverage",
+  "versions": {
+    "attack": "14",
+    "navigator": "4.9.1",
+    "layer": "4.5"
+  },
+  "domain": "enterprise-attack",
+  "description": "Attack frequency by technique \u2014 ClinicalShield AI simulation",
+  "techniques": [
+    {
+      "techniqueID": "T1078.004",
+      "score": 74,
+      "color": "",
+      "comment": "FHIR Resource: Practitioner",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1083",
+      "score": 84,
+      "color": "",
+      "comment": "FHIR Resource: CapabilityStatement",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1595.002",
+      "score": 40,
+      "color": "",
+      "comment": "FHIR Resource: Patient",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1059.007",
+      "score": 38,
+      "color": "",
+      "comment": "FHIR Resource: MedicationRequest",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1592",
+      "score": 41,
+      "color": "",
+      "comment": "FHIR Resource: OperationOutcome",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1565.001",
+      "score": 42,
+      "color": "",
+      "comment": "FHIR Resource: DiagnosticReport",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1190",
+      "score": 37,
+      "color": "",
+      "comment": "FHIR Resource: Patient",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1071",
+      "score": 38,
+      "color": "",
+      "comment": "FHIR Resource: Appointment",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1059",
+      "score": 36,
+      "color": "",
+      "comment": "FHIR Resource: MessageHeader",
+      "enabled": true
+    },
+    {
+      "techniqueID": "T1071.001",
+      "score": 40,
+      "color": "",
+      "comment": "FHIR Resource: MedicationRequest",
+      "enabled": true
+    }
+  ],
+  "gradient": {
+    "colors": [
+      "#ffffff",
+      "#ff0000"
+    ],
+    "minValue": 0,
+    "maxValue": 84
+  }
+}

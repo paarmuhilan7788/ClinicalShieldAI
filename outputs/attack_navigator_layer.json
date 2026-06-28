@@ -10,7 +10,7 @@
   "techniques": [
     {
       "techniqueID": "T1078.004",
-      "score": 74,
+      "score": 83,
       "color": "",
       "comment": "FHIR Resource: Practitioner",
       "enabled": true
@@ -31,7 +31,7 @@
     },
     {
       "techniqueID": "T1059.007",
-      "score": 38,
+      "score": 49,
       "color": "",
       "comment": "FHIR Resource: MedicationRequest",
       "enabled": true
@@ -52,7 +52,7 @@
     },
     {
       "techniqueID": "T1190",
-      "score": 37,
+      "score": 39,
       "color": "",
       "comment": "FHIR Resource: Patient",
       "enabled": true

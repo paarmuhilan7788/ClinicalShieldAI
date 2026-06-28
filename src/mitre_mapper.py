@@ -1,4 +1,5 @@
 import json
+import os
 
 # Step 2 - Load MITRE STIX data and build lookup dict
 def load_mitre_stix():
@@ -78,10 +79,12 @@ def load_classifications():
     return enriched
 
 def generate_navigator_layer(enriched):
+    print(f"Enriched count :{len(enriched)}")
     # Count frequency of each TTP
     ttp_counts = {}
     for record in enriched:
         ttp_id = record.get("mitre_enriched", {}).get("ttp_id", "")
+        print(f"ttp_id found: {ttp_id}")
         fhir = record.get("mitre_enriched", {}).get("fhir_resource", "")
         if ttp_id:
             if ttp_id not in ttp_counts:
@@ -112,10 +115,13 @@ def generate_navigator_layer(enriched):
         }
     }
 
+    os.makedirs("outputs", exist_ok=True)
     with open("outputs/attack_navigator_layer.json", "w") as f:
         json.dump(layer, f, indent=2)
 
     print(f"Navigator layer saved → outputs/attack_navigator_layer.json")
+
+    return layer
 
 if __name__ == "__main__":
     enriched = load_classifications()

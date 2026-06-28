@@ -7,7 +7,12 @@ VALID_FHIR_RESOURCES = [
     "DiagnosticReport", "Condition", "Encounter", "Practitioner",
     "Organization", "AllergyIntolerance", "Immunization", "Procedure",
     "Device", "Location", "Medication", "Bundle", "MessageHeader",
-    "CapabilityStatement", "OperationOutcome", "CarePlan", "CareTeam"
+    "CapabilityStatement", "OperationOutcome", "CarePlan", "CareTeam",
+    "DocumentReference", "ServiceRequest", "Claim", "Goal",
+    "Consent", "ClinicalImpression", "DeviceUseStatement", "FamilyMemberHistory",
+    "MedicationAdministration", "MedicationDispense", "MedicationStatement",
+    "NutritionOrder", "PractitionerRole", "ProcedureRequest", "Specimen",
+    "Lab"
 ]
 
 #Test1 - To check the existence of the simulation_results file - empty or not

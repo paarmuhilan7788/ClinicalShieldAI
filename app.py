@@ -101,9 +101,10 @@ if page == "Live Simulation":
             "verbose_error_leakage", "unvalidated_fhir_reference", "timing_side_channel"])
         
     with col2:
-        fhir_filter = st.selectbox("FHIR Resource Selection", ["All", "Patient", "MedicationRequest", "Observation",
-            "Appointment", "DiagnosticReport", "Practitioner",
-            "CapabilityStatement", "MessageHeader"])
+        with open("data/attack_train.json") as f:
+            _all = json.load(f)
+        unique_resources = sorted(set(r["fhir_resource"] for r in _all))
+        fhir_filter = st.selectbox("FHIR Resource Selection", ["All"] + unique_resources)
         
     with col3:
         attack_counter = st.slider("Number of Attacks", min_value=1, max_value=50, value=5)

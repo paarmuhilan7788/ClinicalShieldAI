@@ -85,7 +85,7 @@ if st.button("Reset Session"):# Reset button ----> counter=0, returns app to ref
 #PAGE NAVIGATION
 page = st.sidebar.selectbox(
     "Navigation",
-    ["Live Simulation", "Threat Classifications", "MITRE Heatmap", "Generate Report"]
+    ["Live Simulation", "Threat Classifications", "MITRE Heatmap", "Generate Report", "Evaluation"]
 )
 
 if page == "Live Simulation":
@@ -363,7 +363,86 @@ elif page == "Generate Report":
                         mime="application/pdf"
                     )
 
+
+
     except FileNotFoundError:
         st.warning("No classifications found. Run a simulation first.")
+
+elif page == "Evaluation":
+    st.title("📊 Classifier Evaluation")
+    st.caption("Precision, Recall and F1 Score against ground truth labels")
+
+    try:
+        records = []
+        with open("results/classifications.jsonl", "r") as f:
+            for line in f:
+                records.append(json.loads(line))
+
+        y_true = []
+        y_pred = []
+
+        for rec in records:
+            gt = rec.get("ground_truth", {})
+            pred = rec.get("prediction", {})
+            y_true.append(True)  # every record in dataset is an attack
+            y_pred.append(pred.get("is_attack", False))
+
+        tp = sum(1 for t, p in zip(y_true, y_pred) if t and p)
+        fp = sum(1 for t, p in zip(y_true, y_pred) if not t and p)
+        fn = sum(1 for t, p in zip(y_true, y_pred) if t and not p)
+
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+        accuracy = sum(1 for t, p in zip(y_true, y_pred) if t == p) / len(y_true)
+
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Precision", f"{precision:.2%}")
+        col2.metric("Recall", f"{recall:.2%}")
+        col3.metric("F1 Score", f"{f1:.2%}")
+        col4.metric("Accuracy", f"{accuracy:.2%}")
+
+        st.divider()
+        st.subheader("Confusion Matrix")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"""
+            <div style="background:#1e2130; padding:1.5rem; border-radius:8px; border-left:4px solid #ff4b4b">
+                <div style="color:#aaa; font-size:0.85rem">True Positives</div>
+                <div style="color:white; font-size:2rem; font-weight:bold">{tp}</div>
+                <div style="color:#aaa; font-size:0.75rem">Correctly flagged as attacks</div>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""
+            <div style="background:#1e2130; padding:1.5rem; border-radius:8px; border-left:4px solid #ffd700">
+                <div style="color:#aaa; font-size:0.85rem">False Negatives</div>
+                <div style="color:white; font-size:2rem; font-weight:bold">{fn}</div>
+                <div style="color:#aaa; font-size:0.75rem">Attacks missed by the LLM</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.divider()
+        st.subheader("Per-Vector Recall")
+        vector_stats = {}
+        for rec in records:
+            vt = rec.get("ground_truth", {}).get("vector_type", "unknown")
+            pred_attack = rec.get("prediction", {}).get("is_attack", False)
+            if vt not in vector_stats:
+                vector_stats[vt] = {"total": 0, "detected": 0}
+            vector_stats[vt]["total"] += 1
+            if pred_attack:
+                vector_stats[vt]["detected"] += 1
+
+        vector_df = pd.DataFrame([
+            {"Vector": k, "Total": v["total"], "Detected": v["detected"],
+             "Recall": f"{v['detected']/v['total']:.2%}"}
+            for k, v in sorted(vector_stats.items())
+        ])
+        st.dataframe(vector_df, use_container_width=True)
+
+    except FileNotFoundError:
+        st.warning("No classifications found. Run a simulation first.")
+
 
 

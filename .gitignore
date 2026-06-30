@@ -29,8 +29,7 @@ build/
 *.sqlite3
 
 # ── Logs & Results (keep structure, ignore data) ──────────────
-results/*.jsonl
-results/*.json
+results/simulation_results.jsonl
 *.log
 
 # ── OS Files ──────────────────────────────────────────────────

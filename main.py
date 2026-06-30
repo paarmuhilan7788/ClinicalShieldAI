@@ -16,6 +16,10 @@ app = FastAPI(
 )
 app.include_router(router)
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 #Mock Patients-ResourceType data
 patients = {
     "p001" : {"id":"p001", "resourceType":"Patient", "name":"Tom", "gender":"M", "birthDate":"1985-03-12"},

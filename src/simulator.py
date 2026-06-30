@@ -16,10 +16,21 @@ def get_token():
     })
     return response.json()["access_token"]
 
+def is_server_available():
+    try:
+        httpx.get(BASE_URL + "/health", timeout=2)
+        return True
+    except Exception:
+        return False
+
 class AttackSimulator:
     def __init__(self):
-        self.token = get_token() #When an object of this class is created, a token is assigned to it and it every request uses this token
-        self.headers = {"Authorization" : "Bearer" + " " + self.token}
+        if is_server_available():
+            self.token = get_token()
+            self.headers = {"Authorization" : "Bearer" + " " + self.token}
+        else:
+            self.token = None
+            self.headers = {}
 
     def simulate(self, attack_record, mode="active"):
         endpoint = attack_record["target_endpoint"] #Where to deliver

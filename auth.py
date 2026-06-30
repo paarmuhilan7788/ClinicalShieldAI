@@ -1,6 +1,7 @@
 #This file holds the secret key for signing tokens
 #It also holds a fake user database with 2 roles and respectively 2 users.
 import jwt#JSON Web Token
+import os
 from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
@@ -9,14 +10,14 @@ from fastapi import Depends
 
 security = HTTPBearer()
 
-#Global constants
-secret_key = "clinicalshield-cs-key"
+#Global constants — loaded from environment variables
+secret_key = os.environ.get("JWT_SECRET_KEY", "clinicalshield-cs-key")
 algo= "HS256" #HMAC-SHA256, conventionally used for JWT
 
 #Creating the fake user database
 users = {
-    "patient_u" :{"password" : "patient123", "role" :"patient"},
-    "doctor_u" : {"password" : "doc123", "role" : "practitioner"}
+    "patient_u": {"password": os.environ.get("PATIENT_PASSWORD", "patient123"), "role": "patient"},
+    "doctor_u": {"password": os.environ.get("DOCTOR_PASSWORD", "doc123"), "role": "practitioner"}
 }
 
 #Pydantic model for API request validation

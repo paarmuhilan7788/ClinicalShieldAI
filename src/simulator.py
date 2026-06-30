@@ -3,16 +3,17 @@
 import httpx
 import asyncio
 import json
+import os
 import time
 from datetime import datetime
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = os.environ.get("FHIR_SERVER_URL", "http://127.0.0.1:8000")
 
 #To fire requests, we need a JWT token
 def get_token():
     response = httpx.post(url=BASE_URL + "/auth/token", json={
-        "username" : "doctor_u",
-        "password" : "doc123"
+        "username": os.environ.get("DOCTOR_USERNAME", "doctor_u"),
+        "password": os.environ.get("DOCTOR_PASSWORD", "doc123")
     })
     return response.json()["access_token"]
 

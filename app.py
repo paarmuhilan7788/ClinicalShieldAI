@@ -108,6 +108,11 @@ if page == "Live Simulation":
         
     with col3:
         attack_counter = st.slider("Number of Attacks", min_value=1, max_value=50, value=5)
+    
+    from simulator import is_server_available
+    if not is_server_available():
+        st.warning("⚠️ Live simulation requires the FHIR server running locally. Browse pre-classified results on other pages.")
+        st.stop()
 
     if st.button("Run Attack Simulation"):
         with open("data/attack_train.json", "r") as r:
@@ -183,8 +188,8 @@ if page == "Live Simulation":
                         <div style="color:#aaa; font-size:0.85rem; margin-top:0.5rem">
                             {severity_color} Severity: <b style="color:white">{r.get('severity','—')}</b> &nbsp;|&nbsp;
                             🎯 Resource: <b style="color:white">{r['fhir_resource']}</b> &nbsp;|&nbsp;
-                            📡 Status: <b style="color:white">{r.get('status_code','—')}</b> &nbsp;|&nbsp;
-                            ⏱ Latency: <b style="color:white">{r.get('latency_ms','—')}ms</b> &nbsp;|&nbsp;
+                            📡Status: <b style="color:white">{r.get('status_code') or 'N/A'}</b> &nbsp;|&nbsp;
+                            ⏱ Latency: <b style="color:white">{str(r.get('latency_ms')) + 'ms' if r.get('latency_ms') else 'N/A'}</b>
                             🎲 Confidence: <b style="color:white">{r.get('confidence','—')}</b>
                         </div>
                         <div style="color:#ccc; font-size:0.85rem; margin-top:0.5rem">💬 {r.get('explanation','—')}</div>
@@ -256,6 +261,7 @@ elif page == "MITRE Heatmap":
             st.subheader("TTP Hit Frequency")
             df["ttp_id"] = df["mitre_enriched"].apply(lambda x: x.get("ttp_id", "Unknown"))
             df["ttp_name"] = df["mitre_enriched"].apply(lambda x: x.get("ttp_name", "Unknown"))
+            df = df[df["ttp_id"] != ""]
             ttp_counts = df["ttp_id"].value_counts().reset_index()
             ttp_counts.columns = ["TTP", "Count"]
             

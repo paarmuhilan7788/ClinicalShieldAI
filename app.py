@@ -135,7 +135,9 @@ if page == "Live Simulation":
                         payload=record["payload"],
                         status_code=simulator_result["status_code"],
                         response_body=simulator_result["response_body"],
-                        latency=simulator_result["latency_ms"]
+                        latency=simulator_result["latency_ms"],
+                        http_method=record.get("http_method"),
+                        endpoint=record.get("target_endpoint")
                     )
                     results.append({
                         "attack_id": record["attack_id"],
@@ -152,7 +154,11 @@ if page == "Live Simulation":
                     with open("results/classifications.jsonl", "a") as f:
                         f.write(json.dumps({
                             "attack_id": record["attack_id"],
-                            "ground_truth": {"vector_type": record["vector_type"], "fhir_resource": record["fhir_resource"]},
+                            "ground_truth": {
+                                "vector_type": record["vector_type"],
+                                "fhir_resource": record["fhir_resource"],
+                                "is_attack": record.get("is_attack", True)
+                            },
                             "prediction": pred
                         }) + "\n")
 
@@ -384,7 +390,7 @@ elif page == "Evaluation":
         for rec in records:
             gt = rec.get("ground_truth", {})
             pred = rec.get("prediction", {})
-            y_true.append(True)  # every record in dataset is an attack
+            y_true.append(gt.get("is_attack", True))
             y_pred.append(pred.get("is_attack", False))
 
         tp = sum(1 for t, p in zip(y_true, y_pred) if t and p)

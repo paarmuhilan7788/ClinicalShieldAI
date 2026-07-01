@@ -1,78 +1,91 @@
-# ClinicalShieldAI
-An LLM powered threat detection tool for FHIR R4 Systems
+# ClinicalShield AI
+An LLM-powered adversarial threat detection tool for FHIR R4 EHR systems
 
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://clinicalshield-ai.streamlit.app)
 
-![CI](https://github.com/yourname/clinicalshield-ai/actions/workflows/test.yml/badge.svg)
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-app-url.streamlit.app)
+ClinicalShield AI simulates adversarial attacks against a mock FHIR R4 EHR API, classifies each attack using an LLM (Claude Haiku), maps findings to MITRE ATT&CK TTPs, and generates a clinical-grade threat assessment report.
 
-ClinicalShield AI simulates adversarial attacks against a mock FHIR R4 EHR API, classifies each attack using an LLM, maps findings to MITRE ATT&amp;CK TTPs and generates a clinical-grade threat assessment report. 
+🎥 [Watch 3-minute Loom walkthrough](https://loom.com/your-link)
+🌐 [Live Dashboard](https://clinicalshield-ai.streamlit.app)
 
-🎥 [Watch 3-minute Loom walkthrough](https://loom.com/your-link)  #to be changed
-🌐 [Live Dashboard](https://your-app.streamlit.app) #to be changed
+Enterprise healthcare systems are among the top 3 sectors targeted by ransomware globally. FHIR R4 is the standard for health data interoperability, mandated and adopted by Cerner, Heidi Health, and other emerging clinical AI platforms. With the rise of GenAI making sophisticated attacks easier to craft, and almost no purpose-built security tooling for FHIR-based clinical AI workflows, ClinicalShield AI aims to bridge that gap.
 
-Enterprise healthcare systems are among the top 3 sectors targeted by ransomware globally. FHIR R4 is the standard for data interoperability, i.e data exchange among healthcare instituions and is mandated and adopted by Cerner, Heidi Health and other emerging AI scribes. As most of the security tooling is generic and withthe rise of GenAI, sphisticating an attack is much simpler these days. With almost no safepoint for FHIR based clinical AI workflows, this tool aims to thus bridge this necessity. 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
 
-#WHAT THE PROJECT DOES?
--Simulates 12 different adversarial attacks against a mock FHIR R4 EHR API.
--Classifies each attack using Claude and maps the observation with MITRE ATT&CK
--Visualizes the findings in an interactive streamlist dashboard.
--Genrates a clinical grade threat assessment report in .pdf format. 
+## What It Does
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- Simulates 12 adversarial attack vectors against a mock FHIR R4 EHR API
+- Classifies each request using Claude Haiku and maps findings to MITRE ATT&CK
+- Visualises threat intelligence in an interactive Streamlit dashboard
+- Generates a clinical-grade threat assessment report in PDF format
+- Supports live attack simulation against a deployed FastAPI FHIR server
 
-#SYSTEM ARCHITECTURE
+---
 
-User → Streamlit Dashboard → Attack Simulation Engine → FHIR Mock API
-↓
-LLM Threat Classifier (Claude)
-↓
-MITRE ATT&CK Mapper
-↓
-Report Generator → PDF Download
+## System Architecture
 
+```
+User → Streamlit Dashboard → Attack Simulation Engine → FHIR Mock API (Railway)
+                                                                ↓
+                                                  LLM Threat Classifier (Claude Haiku)
+                                                                ↓
+                                                    MITRE ATT&CK Mapper
+                                                                ↓
+                                                  Report Generator → PDF Download
+```
 
+---
 
-PROJECT STRUCTURE:
+## Project Structure
 
+```
 clinicalshield-ai/
-├── fhir_api/           # Mock FHIR R4 server (FastAPI)
-│   └── main.py         # 5 endpoints including /metadata
+├── main.py               # Mock FHIR R4 server (FastAPI) — 5 endpoints
+├── auth.py               # JWT authentication layer
+├── app.py                # Streamlit dashboard (5 pages)
 ├── src/
-│   ├── simulator.py    # Attack simulation engine
-│   ├── classifier.py   # LLM threat classifier (Claude)
-│   └── mitre_mapper.py # MITRE ATT&CK sub-technique mapping
+│   ├── simulator.py      # Attack simulation engine
+│   ├── classifier.py     # LLM threat classifier (Claude Haiku)
+│   ├── mitre_mapper.py   # MITRE ATT&CK sub-technique mapping
+│   └── report_generator.py
 ├── data/
-│   ├── attacks_train.json   # 184 labelled attack records
-│   ├── attacks_test.json    # 46 held-out test records
-│   └── README.md            # Dataset schema documentation
-├── results/            # Simulation + classification JSONL outputs
-├── eval/               # Accuracy metrics + stress test results
-├── reports/            # Generated PDF threat assessment reports
-├── assets/             # Demo GIF, MITRE heatmap screenshot
-├── research/           # Kaggle notebooks + references
-├── outputs/            # ATT&CK Navigator layer JSON
-├── tests/              # Unit + integration tests
-├── app.py              # Streamlit dashboard (4 pages)
-├── .env.example        # Environment variable template
-└── docs/               # Threat model, journal, retrospective
+│   └── attack_train.json # 946 labelled records (470 attacks, 476 benign)
+├── results/
+│   └── classifications.jsonl  # Pre-classified results for demo
+├── classify_attacks.py   # Batch classifier for attack records
+├── classify_benign.py    # Batch classifier for benign records
+├── Procfile              # Railway deployment config
+└── requirements.txt
+```
 
+---
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-TECH STACK:
+## Tech Stack
 
-Layer | Technology |
+| Layer | Technology |
 |-------|------------|
-| EHR Mock API | FastAPI + SQLite + Synthea Dataset |
-| Attack Engine | Python + httpx + asyncio |
-| AI Classifier | Claude API (`claude-sonnet-4-6`) |
-| MITRE Mapping | STIX JSON + ATT&CK Navigator |
+| EHR Mock API | FastAPI + Uvicorn |
+| Attack Engine | Python + httpx |
+| AI Classifier | Claude API (`claude-haiku-4-5-20251001`) |
+| MITRE Mapping | ATT&CK TTP framework |
 | Dashboard | Streamlit + Plotly |
 | Report Export | fpdf2 |
-| CI/CD | GitHub Actions |
-| Deployment | Streamlit Cloud |
+| Deployment | Streamlit Cloud + Railway |
 
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+
+## Classifier Performance
+
+| Metric | Score |
+|--------|-------|
+| Precision | 67.15% |
+| Recall | 86.64% |
+| F1 Score | 75.66% |
+| Accuracy | 72.04% |
+
+Recall is prioritised over precision — in clinical environments, a missed attack is far more costly than a false alarm.
+
+---
 
 ## Quick Start
 
@@ -83,45 +96,31 @@ cd clinicalshield-ai
 pip install -r requirements.txt
 
 # 2. Add your API key
-cp .env.example .env
-# Open .env and add: ANTHROPIC_API_KEY=your-key-here
+echo "ANTHROPIC_API_KEY=your-key-here" > .env
 
 # 3. Start the FHIR mock API
-uvicorn fhir_api.main:app --reload
+uvicorn main:app --reload
 
 # 4. Launch the dashboard (new terminal)
 streamlit run app.py
 ```
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+---
+
 ## Dataset
 
-The 230-sample labelled FHIR adversarial attack dataset used in this project is publicly available on Kaggle:
+946 labelled FHIR R4 adversarial request-response pairs across 12 attack vectors and 37 FHIR resource types.
 
-📊 [FHIR R4 EHR Adversarial Attack Dataset](https://kaggle.com/yourname/fhir-attack-dataset)
+Schema: `attack_id | vector_type | fhir_resource | target_endpoint | http_method | payload | mitre_ttp | severity | is_attack`
 
-Schema: `attack_id | vector_type | fhir_resource | target_endpoint | mitre_ttp | severity | is_attack`
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
+
+## Attack Vectors Covered
+
+`prompt_injection` · `sql_injection` · `jwt_token_forgery` · `role_spoofing` · `idor_patient_ids` · `fhir_endpoint_enumeration` · `ssrf_medication_url` · `hl7_message_injection` · `adversarial_nlp` · `verbose_error_leakage` · `unvalidated_fhir_reference` · `timing_side_channel`
+
+---
 
 ## Disclaimer
 
-This project uses a fully synthetic dataset (Synthea) and a mock API.
-No real patient data was used at any point. Built for security research and educational purposes only.
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-Placeholders to add as I progress:
-
-Kaggle link → Day 15 when you publish the dataset
-Demo GIF → Day 16 when you record it
-Live Streamlit URL → Day 17 when you deploy
-Key Findings numbers → Day 6 after the classifier runs
-Threat report PDF link → Day 14 when the report is done
-Your name, email, LinkedIn → fill these in now actually
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-Notes:
-1.Anyone cloning the repository can generate the fhir.db just by running the load_synthea.py
-
-
-
-
-
+This project uses a fully synthetic dataset and a mock API. No real patient data was used at any point. Built for security research and educational purposes only.

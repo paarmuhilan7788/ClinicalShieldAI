@@ -5,7 +5,6 @@ An LLM-powered adversarial threat detection tool for FHIR R4 EHR systems
 
 ClinicalShield AI simulates adversarial attacks against a mock FHIR R4 EHR API, classifies each attack using an LLM (Claude Haiku), maps findings to MITRE ATT&CK TTPs, and generates a clinical-grade threat assessment report.
 
-🎥 [Watch 3-minute Loom walkthrough](https://loom.com/your-link)
 🌐 [Live Dashboard](https://clinicalshield-ai.streamlit.app)
 
 Enterprise healthcare systems are among the top 3 sectors targeted by ransomware globally. FHIR R4 is the standard for health data interoperability, mandated and adopted by Cerner, Heidi Health, and other emerging clinical AI platforms. With the rise of GenAI making sophisticated attacks easier to craft, and almost no purpose-built security tooling for FHIR-based clinical AI workflows, ClinicalShield AI aims to bridge that gap.
